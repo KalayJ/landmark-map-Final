@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Landmark App with Search</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+        #map {
+            height: 500px;
+            width: 90%;
+            margin: 20px auto;
+            border-radius: 8px;
+            border: 2px solid black;
+        }
+        button {
+            margin: 10px 5px;
+            padding: 12px 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        #output {
+            width: 90%;
+            margin: 20px auto;
+            padding: 10px;
+            font-size: 15px;
+            color: #222;
+            text-align: left;
+        }
+        #output li {
+            margin-bottom: 6px;
+        }
+        #searchInput {
+            margin-top: 10px;
+            padding: 10px;
+            width: 80%;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Landmark Map</h2>
+    <input type="text" id="searchInput" placeholder="Search landmarks..." onkeyup="searchLandmarks()">
+    <div id="map"></div>
+    <button onclick="toggleAddNoteMode()">Add Notes</button>
+    <button onclick="getVisited()">Visited Landmarks</button>
+    <button onclick="toggleVisitingMode()">Create Visiting Plan</button>
+    <ul id="output"></ul>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let addNoteMode = false;
+        let visitingMode = false;
+
+        function toggleAddNoteMode() {
+            addNoteMode = !addNoteMode;
+            visitingMode = false;
+            alert(addNoteMode ? "Add Note Mode ON" : "Add Note Mode OFF");
+        }
+
+        function toggleVisitingMode() {
+            visitingMode = !visitingMode;
+            addNoteMode = false;
+            alert(visitingMode ? "Visiting Mode ON" : "Visiting Mode OFF");
+        }
+
+        map.on('click', async function(e) {
+            if (addNoteMode || visitingMode) return;
+            let name = prompt("Enter landmark name:");
+            let description = prompt("Enter description:");
+            let category = prompt("Enter category:");
+            if (!name) return;
+
+            let lat = e.latlng.lat.toFixed(6);
+            let lng = e.latlng.lng.toFixed(6);
+            let id = Date.now();
+
+            const marker = L.marker([lat, lng]).addTo(map).bindPopup(name).openPopup();
+            marker.on('click', async () => handleMarkerClick(id, name));
+
+            await fetch('http://localhost:5000/api/landmarks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, name, latitude: lat, longitude: lng, description, category })
+            });
+        });
+
+        async function handleMarkerClick(id, name) {
+            if (!addNoteMode && !visitingMode) return;
+            const note = prompt("Enter note for " + name);
+            if (!note) return;
+
+            await fetch('http://localhost:5000/api/visited', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    landmark_id: id,
+                    visited_date: new Date().toISOString().split('T')[0],
+                    visitor_name: "Mert",
+                    visiting_note: note
+                })
+            });
+        }
+
+        async function getVisited() {
+            addNoteMode = false;
+            visitingMode = false;
+            const res = await fetch('http://localhost:5000/api/visited');
+            const data = await res.json();
+            let out = document.getElementById('output');
+            out.innerHTML = "";
+            data.forEach(v => {
+                const li = document.createElement('li');
+                li.textContent = `Landmark: ${v.name}, Visitor: ${v.visitor_name}, Date: ${v.visited_date}, Note: ${v.visiting_note}`;
+                out.appendChild(li);
+            });
+        }
+
+        function searchLandmarks() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            fetch('http://localhost:5000/api/landmarks')
+                .then(res => res.json())
+                .then(data => {
+                    let out = document.getElementById('output');
+                    out.innerHTML = "";
+                    data.forEach(point => {
+                        const matches = point.name.toLowerCase().includes(searchValue) ||
+                                        point.description.toLowerCase().includes(searchValue) ||
+                                        point.category.toLowerCase().includes(searchValue);
+                        if (matches) {
+                            const li = document.createElement('li');
+                            li.textContent = `Landmark: ${point.name} (${point.location.latitude}, ${point.location.longitude}) | Category: ${point.category} | Description: ${point.description}`;
+                            out.appendChild(li);
+                        }
+                    });
+                });
+        }
+
+        fetch('http://localhost:5000/api/landmarks')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(point => {
+                    let marker = L.marker([point.location.latitude, point.location.longitude])
+                        .addTo(map)
+                        .bindPopup(point.name);
+                    marker.on('click', () => handleMarkerClick(point.id, point.name));
+                });
+            });
+    </script>
+</body>
+</html>

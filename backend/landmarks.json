@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1746739452998,
+    "name": "adana",
+    "location": {
+      "latitude": "36.974224",
+      "longitude": "35.291472"
+    },
+    "description": "çok sıcak",
+    "category": "natural"
+  },
+  {
+    "id": 1746739474462,
+    "name": "konya",
+    "location": {
+      "latitude": "37.959158",
+      "longitude": "32.729133"
+    },
+    "description": "40",
+    "category": "natural"
+  },
+  {
+    "id": 1746739818390,
+    "name": "didim",
+    "location": {
+      "latitude": "37.371734",
+      "longitude": "27.250598"
+    },
+    "description": "ulaş agaya ziyaret",
+    "category": "natural"
+  },
+  {
+    "id": 1746745541888,
+    "name": "ordu",
+    "location": {
+      "latitude": "40.852477",
+      "longitude": "38.364915"
+    },
+    "description": "cultur",
+    "category": "cultur"
+  },
+  {
+    "id": 1746745601488,
+    "name": "adıyaman",
+    "location": {
+      "latitude": "37.617738",
+      "longitude": "38.782269"
+    },
+    "description": "descriptiopn",
+    "category": "category"
+  },
+  {
+    "id": 1746785961556,
+    "name": "kıbrıs",
+    "location": {
+      "latitude": "34.468117",
+      "longitude": "31.815463"
+    },
+    "description": "açıklama",
+    "category": "natural"
+  },
+  {
+    "id": 1746787838719,
+    "name": "ankara",
+    "location": {
+      "latitude": "40.000023",
+      "longitude": "32.893902"
+    },
+    "description": "açıklama",
+    "category": "natural"
+  },
+  {
+    "id": 1746787935031,
+    "name": "istanbul",
+    "location": {
+      "latitude": "41.084893",
+      "longitude": "29.093781"
+    },
+    "description": "açıklama",
+    "category": "natural"
+  },
+  {
+    "id": 1746790319364,
+    "name": "asadasd",
+    "location": {
+      "latitude": "39.371256",
+      "longitude": "27.973514"
+    },
+    "description": "acadsa",
+    "category": "atural"
+  }
+]
